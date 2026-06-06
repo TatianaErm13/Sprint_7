@@ -1,34 +1,28 @@
 import pytest
-import requests
 
-from helpers import register_new_courier_and_return_login_password
-from data import (
-    BASE_URL,
-    LOGIN_COURIER_PATH,
-    DELETE_COURIER_PATH
+from helpers import generate_courier_data
+from courier_methods import (
+    create_courier,
+    login_courier,
+    delete_courier
 )
 
 
 @pytest.fixture
 def created_courier():
 
-    courier = register_new_courier_and_return_login_password()
+    payload = generate_courier_data()
 
-    login = courier[0]
-    password = courier[1]
+    create_courier(payload)
 
-    login_response = requests.post(
-        f"{BASE_URL}{LOGIN_COURIER_PATH}",
-        data={
-            "login": login,
-            "password": password
-        }
+    yield payload
+
+    login_response = login_courier(
+        payload["login"],
+        payload["password"]
     )
 
     courier_id = login_response.json()["id"]
 
-    yield courier
-
-    requests.delete(
-        f"{BASE_URL}{DELETE_COURIER_PATH}/{courier_id}"
-    )
+    delete_courier(courier_id)
+    

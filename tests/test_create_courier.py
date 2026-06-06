@@ -1,59 +1,38 @@
-import requests
-import random
-import string
+import allure
 
+from helpers import generate_courier_data
+from courier_methods import create_courier
 from data import (
-    BASE_URL,
-    CREATE_COURIER_PATH,
     CREATE_COURIER_ERROR,
     DUPLICATE_LOGIN_ERROR
 )
 
 
-def generate_random_string(length):
-    letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for _ in range(length))
-
-
 class TestCreateCourier:
 
+    @allure.title("Успешное создание курьера")
     def test_create_courier_success(self):
 
-        payload = {
-            "login": generate_random_string(10),
-            "password": generate_random_string(10),
-            "firstName": generate_random_string(10)
-        }
+        payload = generate_courier_data()
 
-        response = requests.post(
-            f"{BASE_URL}{CREATE_COURIER_PATH}",
-            data=payload
-        )
+        response = create_courier(payload)
 
         assert response.status_code == 201
         assert response.json() == {"ok": True}
 
+    @allure.title("Нельзя создать двух одинаковых курьеров")
     def test_create_duplicate_courier(self):
 
-        payload = {
-            "login": generate_random_string(10),
-            "password": generate_random_string(10),
-            "firstName": generate_random_string(10)
-        }
+        payload = generate_courier_data()
 
-        requests.post(
-            f"{BASE_URL}{CREATE_COURIER_PATH}",
-            data=payload
-        )
+        create_courier(payload)
 
-        response = requests.post(
-            f"{BASE_URL}{CREATE_COURIER_PATH}",
-            data=payload
-        )
+        response = create_courier(payload)
 
         assert response.status_code == 409
         assert response.json()["message"] == DUPLICATE_LOGIN_ERROR
 
+    @allure.title("Создание курьера без логина")
     def test_create_courier_without_login(self):
 
         payload = {
@@ -61,25 +40,21 @@ class TestCreateCourier:
             "firstName": "Ivan"
         }
 
-        response = requests.post(
-            f"{BASE_URL}{CREATE_COURIER_PATH}",
-            data=payload
-        )
+        response = create_courier(payload)
 
         assert response.status_code == 400
         assert response.json()["message"] == CREATE_COURIER_ERROR
 
+    @allure.title("Создание курьера без пароля")
     def test_create_courier_without_password(self):
 
         payload = {
-            "login": generate_random_string(10),
+            "login": "test_login",
             "firstName": "Ivan"
         }
 
-        response = requests.post(
-            f"{BASE_URL}{CREATE_COURIER_PATH}",
-            data=payload
-        )
+        response = create_courier(payload)
 
         assert response.status_code == 400
         assert response.json()["message"] == CREATE_COURIER_ERROR
+        

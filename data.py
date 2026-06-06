@@ -6,6 +6,7 @@ DELETE_COURIER_PATH = "/courier"
 
 CREATE_ORDER_PATH = "/orders"
 GET_ORDERS_PATH = "/orders"
+CANCEL_ORDER_PATH = "/orders/cancel"
 
 CREATE_COURIER_ERROR = "Недостаточно данных для создания учетной записи"
 LOGIN_ERROR = "Недостаточно данных для входа"

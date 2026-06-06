@@ -1,11 +1,15 @@
+import allure
 import pytest
-import requests
 
-from data import BASE_URL, CREATE_ORDER_PATH
+from order_methods import (
+    create_order,
+    cancel_order
+)
 
 
 class TestCreateOrder:
 
+    @allure.title("Создание заказа с различными вариантами цвета")
     @pytest.mark.parametrize(
         "color",
         [
@@ -29,17 +33,12 @@ class TestCreateOrder:
             "color": color
         }
 
-        response = requests.post(
-            f"{BASE_URL}{CREATE_ORDER_PATH}",
-            json=payload
-        )
+        response = create_order(payload)
 
         assert response.status_code == 201
         assert "track" in response.json()
 
         track = response.json()["track"]
 
-        requests.put(
-            f"{BASE_URL}/api/v1/orders/cancel",
-            params={"track": track}
-        )
+        cancel_order(track)
+        
